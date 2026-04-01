@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>Llama</AssemblyName>
+    <RootNamespace>Llama</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <TargetExt>.gha</TargetExt>
+    <!-- Enable building on non-Windows platforms -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <GrasshopperLibrariesDir Condition="'$(GrasshopperLibrariesDir)' == '' and '$(OS)' == 'Windows_NT'">$(APPDATA)\Grasshopper\Libraries</GrasshopperLibrariesDir>
+    <GrasshopperLibrariesDir Condition="'$(GrasshopperLibrariesDir)' == '' and '$(OS)' != 'Windows_NT'">$(HOME)/Library/Application Support/McNeel/Rhinoceros/MacPlugIns/Grasshopper/Libraries</GrasshopperLibrariesDir>
+    <GrasshopperLlamaDir>$([System.IO.Path]::Combine('$(GrasshopperLibrariesDir)', 'Llama'))</GrasshopperLlamaDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RhinoCommon" Version="8.23.*" />
+    <PackageReference Include="Grasshopper" Version="8.23.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Llama.Core\Llama.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Llama_24x24.png" />
+    <EmbeddedResource Include="Resources\Llama.png" />
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Llama.Grasshopper.Properties</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <Target Name="CopyGhaToGrasshopperLibraries" AfterTargets="Build" Condition="'$(GrasshopperLibrariesDir)' != '' and Exists('$(GrasshopperLibrariesDir)')">
+    <MakeDir Directories="$(GrasshopperLlamaDir)" Condition="!Exists('$(GrasshopperLlamaDir)')" />
+    <Message Text="Copying $(TargetFileName) to $(GrasshopperLlamaDir)" Importance="High" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GrasshopperLlamaDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyLlamaDllsToGrasshopperLibraries" AfterTargets="Build" Condition="'$(GrasshopperLibrariesDir)' != '' and Exists('$(GrasshopperLibrariesDir)')">
+    <ItemGroup>
+      <LlamaDllsToCopy Include="$(TargetDir)Llama*.dll" />
+    </ItemGroup>
+    <MakeDir Directories="$(GrasshopperLlamaDir)" Condition="!Exists('$(GrasshopperLlamaDir)')" />
+    <Message Text="Copying Llama DLLs to $(GrasshopperLlamaDir): @(LlamaDllsToCopy->'%(Filename)%(Extension)', ', ')" Importance="High" Condition="'@(LlamaDllsToCopy)' != ''" />
+    <Copy SourceFiles="@(LlamaDllsToCopy)" DestinationFolder="$(GrasshopperLlamaDir)" SkipUnchangedFiles="true" Condition="'@(LlamaDllsToCopy)' != ''" />
+  </Target>
+</Project>

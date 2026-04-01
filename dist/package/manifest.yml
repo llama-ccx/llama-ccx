@@ -1,15 +1,15 @@
-name: Lama
+name: Llama
 version: 0.0.3
 authors:
 - Marco Pellegrino
 description: Grasshopper plugin that wraps CalculiX, an open-source finite element
   solver, for structural analysis inside Rhino.
-url: https://github.com/pellegrino-research-group/Lama
+url: https://github.com/pellegrino-research-group/Llama
 keywords:
 - Alpaca
 - alpaca
-- Lama
-- lama
+- Llama
+- llama
 - fea
 - fem
 icon: icon.png

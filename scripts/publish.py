@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Publish script for Lama Grasshopper plugin to Yak package manager.
+Publish script for Llama Grasshopper plugin to Yak package manager.
 
 Usage:
     python publish.py --version 1.0.0                    # Build and create package
@@ -82,8 +82,8 @@ def clean_build():
     """Clean build artifacts."""
     print_step("Cleaning build artifacts...")
     
-    bin_path = Path("Lama.Grasshopper/bin")
-    obj_path = Path("Lama.Grasshopper/obj")
+    bin_path = Path("Llama.Grasshopper/bin")
+    obj_path = Path("Llama.Grasshopper/obj")
     
     if bin_path.exists():
         shutil.rmtree(bin_path)
@@ -97,7 +97,7 @@ def clean_build():
 def restore_packages():
     """Restore NuGet packages."""
     print_step("Restoring NuGet packages...")
-    success, output = run_command("dotnet restore Lama.Grasshopper/Lama.Grasshopper.csproj")
+    success, output = run_command("dotnet restore Llama.Grasshopper/Llama.Grasshopper.csproj")
     if not success:
         print_error(f"Failed to restore packages:\n{output}")
         return False
@@ -113,19 +113,19 @@ def build_plugin():
     if platform.system() == "Windows":
         target_framework = "net48"
         print_step(f"Building plugin (Release, {target_framework})...")
-        success, output = run_command(f"dotnet build Lama.Grasshopper/Lama.Grasshopper.csproj -c Release -f {target_framework}")
+        success, output = run_command(f"dotnet build Llama.Grasshopper/Llama.Grasshopper.csproj -c Release -f {target_framework}")
     else:
         # macOS/Linux: build for net8.0
         target_framework = "net8.0"
         print_step(f"Building plugin (Release, {target_framework})...")
-        success, output = run_command(f"dotnet build Lama.Grasshopper/Lama.Grasshopper.csproj -c Release -f {target_framework}")
+        success, output = run_command(f"dotnet build Llama.Grasshopper/Llama.Grasshopper.csproj -c Release -f {target_framework}")
     
     if not success:
         print_error(f"Build failed:\n{output}")
         return False
     
     # Check if .gha file was created
-    gha_path = Path(f"Lama.Grasshopper/bin/Release/{target_framework}/Lama.gha")
+    gha_path = Path(f"Llama.Grasshopper/bin/Release/{target_framework}/Llama.gha")
     if not gha_path.exists():
         print_error(f"Build succeeded but .gha file not found at {gha_path}")
         return False
@@ -178,28 +178,28 @@ def create_yak_package(version):
     else:
         target_framework = "net8.0"
 
-    build_output_dir = Path(f"Lama.Grasshopper/bin/Release/{target_framework}")
+    build_output_dir = Path(f"Llama.Grasshopper/bin/Release/{target_framework}")
     
     # Copy .gha file
-    gha_source = build_output_dir / "Lama.gha"
-    gha_dest = package_dir / "Lama.gha"
+    gha_source = build_output_dir / "Llama.gha"
+    gha_dest = package_dir / "Llama.gha"
     shutil.copy2(gha_source, gha_dest)
     print_success(f"Copied {gha_source} to package")
 
-    # Copy Lama runtime dependencies required by Lama.gha
-    lama_dependency_dlls = list(build_output_dir.glob("Lama*.dll"))
-    if not lama_dependency_dlls:
-        print_warning(f"No Lama*.dll dependencies found in {build_output_dir}")
+    # Copy Llama runtime dependencies required by Llama.gha
+    llama_dependency_dlls = list(build_output_dir.glob("Llama*.dll"))
+    if not llama_dependency_dlls:
+        print_warning(f"No Llama*.dll dependencies found in {build_output_dir}")
 
     core_dll_found = False
-    for dll_source in lama_dependency_dlls:
+    for dll_source in llama_dependency_dlls:
         shutil.copy2(dll_source, package_dir / dll_source.name)
         print_success(f"Copied {dll_source} to package")
-        if dll_source.name.lower() == "lama.core.dll":
+        if dll_source.name.lower() == "llama.core.dll":
             core_dll_found = True
 
-    if lama_dependency_dlls and not core_dll_found:
-        print_warning("Lama.Core.dll was not found in build output")
+    if llama_dependency_dlls and not core_dll_found:
+        print_warning("Llama.Core.dll was not found in build output")
     
     # Copy manifest (from scripts folder)
     script_dir = Path(__file__).parent
@@ -216,7 +216,7 @@ def create_yak_package(version):
         icon_candidates = [
             dist_dir / icon_name,
             script_dir / icon_name,
-            Path("Lama.Grasshopper/Resources") / icon_name,
+            Path("Llama.Grasshopper/Resources") / icon_name,
         ]
         icon_source = next((p for p in icon_candidates if p.exists()), None)
         if icon_source:
@@ -276,7 +276,7 @@ def publish_package(yak_file, test_server=False):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Publish Lama Grasshopper plugin to Yak package manager"
+        description="Publish Llama Grasshopper plugin to Yak package manager"
     )
     parser.add_argument(
         "--version",
@@ -306,7 +306,7 @@ def main():
     
     args = parser.parse_args()
     
-    print(f"\n{Colors.HEADER}{Colors.BOLD}Lama Grasshopper Plugin Publisher{Colors.ENDC}")
+    print(f"\n{Colors.HEADER}{Colors.BOLD}Llama Grasshopper Plugin Publisher{Colors.ENDC}")
     print(f"{Colors.HEADER}{'=' * 50}{Colors.ENDC}\n")
     
     # Change to project root directory (parent of scripts folder)
@@ -333,7 +333,7 @@ def main():
         print_warning("Skipping build step")
         # Verify .gha exists
         target_framework = "net48" if platform.system() == "Windows" else "net8.0"
-        gha_path = Path(f"Lama.Grasshopper/bin/Release/{target_framework}/Lama.gha")
+        gha_path = Path(f"Llama.Grasshopper/bin/Release/{target_framework}/Llama.gha")
         if not gha_path.exists():
             print_error(f"Build artifact not found: {gha_path}")
             sys.exit(1)
