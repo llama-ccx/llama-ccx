@@ -55,24 +55,27 @@ namespace Llama.UI
         {
             // Add Documentation
             menuItem.DropDown.Items.Add("Documentation", null, 
-                (sender, e) => OpenBrowser(sender, e, "https://llama.gitbook.io/docs"));
+                (sender, e) => OpenBrowser(sender, e, "https://llama-ccx.github.io/"));
 
             menuItem.DropDown.Items.Add("Examples", null, 
-                (sender, e) => OpenBrowser(sender, e, "https://llama.gitbook.io/docs/examples"));
+                (sender, e) => OpenBrowser(sender, e, "https://llama-ccx.github.io/examples/"));
 
             menuItem.DropDown.Items.Add(new ToolStripSeparator());
             //----------------------
 
+            // Add Units
+            menuItem.DropDown.Items.Add("Units", null, ShowUnitSettings);
+
             // Add License Management
             ToolStripMenuItem subMenuLicense = new ToolStripMenuItem("License");
-            // subMenuLicense.DropDown.Items.Add("Activate License", null, ShowLicenseManagement);
+            subMenuLicense.DropDown.Items.Add("Activate License", null, ShowLicenseManagement);
             subMenuLicense.DropDown.Items.Add("License Terms", null,
-                (sender, e) => OpenBrowser(sender, e, "https://llama.gitbook.io/docs/references/license"));
+                (sender, e) => OpenBrowser(sender, e, "https://llama-ccx.github.io/references/license/"));
 
             menuItem.DropDown.Items.Add(subMenuLicense);
 
             // Add Help
-            menuItem.DropDown.Items.Add("Help", null, (sender, e) => OpenBrowser(sender, e, "https://github.com/Llama/Llama/issues/new"));
+            menuItem.DropDown.Items.Add("Help", null, (sender, e) => OpenBrowser(sender, e, "https://github.com/llama-ccx/llama-ccx/issues"));
         }
 
         // create an event handler that opens up a sub-window
@@ -125,16 +128,29 @@ namespace Llama.UI
         }
 
         // create an event handler for showing the license management form
-        // private static void ShowLicenseManagement(object sender, EventArgs e)
-        // {
-        //     try
-        //     {
-        //         Llama.UI.LicenseManagementForm.ShowForm();
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         MessageBox.Show($"Error opening license management: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //     }
-        // }
+        private static void ShowLicenseManagement(object sender, EventArgs e)
+        {
+            try
+            {
+                Llama.UI.LicenseManagementForm.ShowForm();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening license management: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // create an event handler for showing the unit settings form
+        private static void ShowUnitSettings(object sender, EventArgs e)
+        {
+            try
+            {
+                Llama.UI.UnitSettingsForm.ShowForm();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening unit settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

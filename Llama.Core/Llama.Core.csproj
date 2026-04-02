@@ -8,4 +8,9 @@
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MessagePack" Version="2.5.*" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.*" />
+  </ItemGroup>
 </Project>

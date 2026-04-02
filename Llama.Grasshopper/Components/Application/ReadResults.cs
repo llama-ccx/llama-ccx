@@ -432,6 +432,7 @@ namespace Llama.Gh.Components
         }
 
         protected override System.Drawing.Bitmap Icon => Llama.Gh.Properties.Resources.Llama_24x24;
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
         public override Guid ComponentGuid => new Guid("f1df9d50-39db-4f00-83ea-04f46f4d8a12");
     }
 }

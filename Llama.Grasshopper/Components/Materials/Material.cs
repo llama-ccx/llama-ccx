@@ -7,6 +7,7 @@ using Grasshopper.Kernel.Types;
 using Llama.Gh.Widgets;
 using Llama.Gh;
 using Llama.Core.Materials;
+using Llama.Core.Units;
 
 namespace Llama.Gh.Components
 {
@@ -69,7 +70,7 @@ namespace Llama.Gh.Components
                 new Param_Number(),
                 "Density",
                 "rho",
-                "Density [kg/m³]",
+                $"Density {UnitLabels.Density_}",
                 GH_ParamAccess.item,
                 new GH_Number(7850.0)
             );
@@ -78,7 +79,7 @@ namespace Llama.Gh.Components
                 new Param_Number(),
                 "Young's Modulus",
                 "E",
-                "Young's Modulus [Pa]",
+                $"Young's Modulus {UnitLabels.Stress_}",
                 GH_ParamAccess.item,
                 new GH_Number(210e9)
             );
@@ -114,17 +115,17 @@ namespace Llama.Gh.Components
                 new Param_Colour(), "Color", "Color", "Material color",
                 GH_ParamAccess.item, new GH_Colour(Color.Gray));
             isoHardening.RegisterInputParam(
-                new Param_Number(), "Density", "rho", "Density [kg/m³]",
+                new Param_Number(), "Density", "rho", $"Density {UnitLabels.Density_}",
                 GH_ParamAccess.item, new GH_Number(7850.0));
             isoHardening.RegisterInputParam(
-                new Param_Number(), "Young's Modulus", "E", "Young's Modulus [Pa]",
+                new Param_Number(), "Young's Modulus", "E", $"Young's Modulus {UnitLabels.Stress_}",
                 GH_ParamAccess.item, new GH_Number(210e9));
             isoHardening.RegisterInputParam(
                 new Param_Number(), "Poisson's Ratio", "nu", "Poisson's Ratio [-]",
                 GH_ParamAccess.item, new GH_Number(0.3));
             isoHardening.RegisterInputParam(
                 new Param_Number(), "Yield Stress", "Sy",
-                "Yield stress values [Pa]. One per hardening curve point. " +
+                $"Yield stress values {UnitLabels.Stress_}. One per hardening curve point. " +
                 "E.g. {250e6, 400e6} for linear hardening.",
                 GH_ParamAccess.list);
             isoHardening.RegisterInputParam(
@@ -164,20 +165,20 @@ namespace Llama.Gh.Components
                 new Param_Number(),
                 "Density",
                 "rho",
-                "Density [kg/m³]",
+                $"Density {UnitLabels.Density_}",
                 GH_ParamAccess.item,
                 new GH_Number(7850.0)
             );
             // Orthotropic-specific inputs
-            orthotropic.RegisterInputParam(new Param_Number(), "E1", "E1", "Young's Modulus E1 [Pa]", GH_ParamAccess.item, new GH_Number(210e9));
-            orthotropic.RegisterInputParam(new Param_Number(), "E2", "E2", "Young's Modulus E2 [Pa]", GH_ParamAccess.item, new GH_Number(210e9));
-            orthotropic.RegisterInputParam(new Param_Number(), "E3", "E3", "Young's Modulus E3 [Pa]", GH_ParamAccess.item, new GH_Number(210e9));
+            orthotropic.RegisterInputParam(new Param_Number(), "E1", "E1", $"Young's Modulus E1 {UnitLabels.Stress_}", GH_ParamAccess.item, new GH_Number(210e9));
+            orthotropic.RegisterInputParam(new Param_Number(), "E2", "E2", $"Young's Modulus E2 {UnitLabels.Stress_}", GH_ParamAccess.item, new GH_Number(210e9));
+            orthotropic.RegisterInputParam(new Param_Number(), "E3", "E3", $"Young's Modulus E3 {UnitLabels.Stress_}", GH_ParamAccess.item, new GH_Number(210e9));
             orthotropic.RegisterInputParam(new Param_Number(), "nu12", "nu12", "Poisson's Ratio nu12 [-]", GH_ParamAccess.item, new GH_Number(0.3));
             orthotropic.RegisterInputParam(new Param_Number(), "nu13", "nu13", "Poisson's Ratio nu13 [-]", GH_ParamAccess.item, new GH_Number(0.3));
             orthotropic.RegisterInputParam(new Param_Number(), "nu23", "nu23", "Poisson's Ratio nu23 [-]", GH_ParamAccess.item, new GH_Number(0.3));
-            orthotropic.RegisterInputParam(new Param_Number(), "G12", "G12", "Shear Modulus G12 [Pa]", GH_ParamAccess.item, new GH_Number(80e9));
-            orthotropic.RegisterInputParam(new Param_Number(), "G13", "G13", "Shear Modulus G13 [Pa]", GH_ParamAccess.item, new GH_Number(80e9));
-            orthotropic.RegisterInputParam(new Param_Number(), "G23", "G23", "Shear Modulus G23 [Pa]", GH_ParamAccess.item, new GH_Number(80e9));
+            orthotropic.RegisterInputParam(new Param_Number(), "G12", "G12", $"Shear Modulus G12 {UnitLabels.Stress_}", GH_ParamAccess.item, new GH_Number(80e9));
+            orthotropic.RegisterInputParam(new Param_Number(), "G13", "G13", $"Shear Modulus G13 {UnitLabels.Stress_}", GH_ParamAccess.item, new GH_Number(80e9));
+            orthotropic.RegisterInputParam(new Param_Number(), "G23", "G23", $"Shear Modulus G23 {UnitLabels.Stress_}", GH_ParamAccess.item, new GH_Number(80e9));
             // Output
             orthotropic.RegisterOutputParam(
                 new Param_GenericObject(),
@@ -197,7 +198,7 @@ namespace Llama.Gh.Components
             // Common inputs (specific matrix inputs to be defined later)
             stiffnessMatrix.RegisterInputParam(new Param_String(), "Name", "Name", "Material name", GH_ParamAccess.item, new GH_String("MAT-STIFF"));
             stiffnessMatrix.RegisterInputParam(new Param_Colour(), "Color", "Color", "Material color", GH_ParamAccess.item, new GH_Colour(Color.Gray));
-            stiffnessMatrix.RegisterInputParam(new Param_Number(), "Density", "rho", "Density [kg/m³]", GH_ParamAccess.item, new GH_Number(7850.0));
+            stiffnessMatrix.RegisterInputParam(new Param_Number(), "Density", "rho", $"Density {UnitLabels.Density_}", GH_ParamAccess.item, new GH_Number(7850.0));
             // Output
             stiffnessMatrix.RegisterOutputParam(
                 new Param_GenericObject(),
@@ -217,9 +218,9 @@ namespace Llama.Gh.Components
             // Common inputs
             spring.RegisterInputParam(new Param_String(), "Name", "Name", "Material name", GH_ParamAccess.item, new GH_String("MAT-SPRING"));
             spring.RegisterInputParam(new Param_Colour(), "Color", "Color", "Material color", GH_ParamAccess.item, new GH_Colour(Color.Gray));
-            spring.RegisterInputParam(new Param_Number(), "Density", "rho", "Density [kg/m³]", GH_ParamAccess.item, new GH_Number(0.0));
+            spring.RegisterInputParam(new Param_Number(), "Density", "rho", $"Density {UnitLabels.Density_}", GH_ParamAccess.item, new GH_Number(0.0));
             // Spring-specific inputs
-            spring.RegisterInputParam(new Param_Number(), "Spring Constant", "k", "Spring constant [N/m]", GH_ParamAccess.item, new GH_Number(1e6));
+            spring.RegisterInputParam(new Param_Number(), "Spring Constant", "k", $"Spring constant {UnitLabels.SpringK_}", GH_ParamAccess.item, new GH_Number(1e6));
             // Output
             spring.RegisterOutputParam(
                 new Param_GenericObject(),

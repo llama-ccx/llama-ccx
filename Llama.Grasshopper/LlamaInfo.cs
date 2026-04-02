@@ -4,6 +4,7 @@ using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.GUI.Canvas;
 using Llama.UI;
+using Llama.Core.Units;
 
 namespace Llama.Gh
 {
@@ -27,6 +28,7 @@ namespace Llama.Gh
 	{
 		public override GH_LoadingInstruction PriorityLoad()
 		{
+			UnitSettings.Load();
 			Instances.CanvasCreated += MenuLoad.OnStartup;
 
 			Bitmap icon = LoadCategoryIcon();

@@ -192,8 +192,9 @@ namespace Llama.Gh.Components
                 return;
             }
 
-            // ── Cache key: dat path + set name ──
-            var key = datPath + "|" + (setName ?? "");
+            // ── Cache key: dat path + modified time + set name ──
+            var lastWrite = File.GetLastWriteTimeUtc(datPath).Ticks;
+            var key = datPath + "|" + lastWrite + "|" + (setName ?? "");
             if (key != _cacheKey)
             {
                 IReadOnlyList<CalculixDatTable> tables;
@@ -508,6 +509,7 @@ namespace Llama.Gh.Components
         }
 
         protected override System.Drawing.Bitmap Icon => Llama.Gh.Properties.Resources.Llama_24x24;
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
         public override Guid ComponentGuid => new Guid("a2c3e8f1-7b4d-4a9e-b6c2-1d5f8e3a7b90");
     }
 }

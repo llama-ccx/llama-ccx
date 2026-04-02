@@ -1,6 +1,7 @@
 using System;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using Llama.Core.Units;
 
 namespace Llama.Gh.Components
 {
@@ -16,7 +17,7 @@ namespace Llama.Gh.Components
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddNumberParameter("Magnitude", "g", "Gravitational acceleration magnitude [m/s²].", GH_ParamAccess.item, 9.81);
+            pManager.AddNumberParameter("Magnitude", "g", $"Gravitational acceleration magnitude {UnitLabels.Accel_}.", GH_ParamAccess.item, 9.81);
             pManager.AddVectorParameter("Direction", "Dir", "Gravity direction vector (will be normalised).", GH_ParamAccess.item, new Vector3d(0, 0, -1));
             pManager.AddTextParameter("Element Set", "Elset", "Target element set name. Leave empty to apply to all elements.", GH_ParamAccess.item, string.Empty);
             pManager[2].Optional = true;
@@ -48,6 +49,7 @@ namespace Llama.Gh.Components
         }
 
         protected override System.Drawing.Bitmap Icon => Llama.Gh.Properties.Resources.Llama_24x24;
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
         public override Guid ComponentGuid => new Guid("c8a2b7f1-3d6e-4a9b-b5c0-1e7f8d2a9c4b");
     }
 }

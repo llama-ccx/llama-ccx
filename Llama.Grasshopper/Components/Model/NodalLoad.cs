@@ -4,6 +4,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Llama.Core.Model;
 using Llama.Core.Model.Loads;
+using Llama.Core.Units;
 
 namespace Llama.Gh.Components
 {
@@ -18,8 +19,8 @@ namespace Llama.Gh.Components
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Point", "P", "Target point to match to a model node.", GH_ParamAccess.item);
-            pManager.AddVectorParameter("Force", "F", "Force vector (Fx, Fy, Fz).", GH_ParamAccess.item);
-            pManager.AddVectorParameter("Moment", "M", "Moment vector (Mx, My, Mz).", GH_ParamAccess.item, Vector3d.Zero);
+            pManager.AddVectorParameter("Force", "F", $"Force vector (Fx, Fy, Fz) {UnitLabels.Force_}.", GH_ParamAccess.item);
+            pManager.AddVectorParameter("Moment", "M", $"Moment vector (Mx, My, Mz) {UnitLabels.Moment_}.", GH_ParamAccess.item, Vector3d.Zero);
             pManager[pManager.ParamCount - 1].Optional = true;
         }
 
@@ -62,6 +63,7 @@ namespace Llama.Gh.Components
         }
 
         protected override System.Drawing.Bitmap Icon => Llama.Gh.Properties.Resources.Llama_24x24;
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
         public override Guid ComponentGuid => new Guid("7360dc75-f79f-4417-ab5f-4ec8e5e20750");
     }
 }

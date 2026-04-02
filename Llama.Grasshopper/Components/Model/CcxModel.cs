@@ -75,6 +75,17 @@ namespace Llama.Gh.Components
 
             AddDistinctMaterials(model, sections);
 
+            if (!Llama.Core.License.License.ValidateLicense(
+                    model.Elements.Count,
+                    false,
+                    () => Llama.UI.LicenseManagementForm.ShowForm(),
+                    100))
+            {
+                AddRuntimeMessage(
+                    GH_RuntimeMessageLevel.Warning,
+                    "License validation failed. The license management form will be shown every 5 minutes.");
+            }
+
             DA.SetData(0, model);
         }
 
