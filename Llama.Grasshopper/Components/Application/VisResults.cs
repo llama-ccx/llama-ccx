@@ -67,18 +67,30 @@ namespace Llama.Gh.Components
             unit.RegisterInputParam(new Param_Colour { Optional = true }, "Deformed Colors", "DC",
                 "Gradient colors for deformed mesh. Default: blue→cyan→green→yellow→red.",
                 GH_ParamAccess.list);
+            // [4] Disp Min
+            unit.RegisterInputParam(new Param_Number { Optional = true }, "Disp Min", "Dmin",
+                "Optional minimum displacement for color mapping. Leave empty for auto.", GH_ParamAccess.item);
+            // [5] Disp Max
+            unit.RegisterInputParam(new Param_Number { Optional = true }, "Disp Max", "Dmax",
+                "Optional maximum displacement for color mapping. Leave empty for auto.", GH_ParamAccess.item);
 
             // ── Stress Component inputs ──
-            // [4] Stress Colors
+            // [6] Stress Colors
             unit.RegisterInputParam(new Param_Colour { Optional = true }, "Stress Colors", "SC",
                 "Gradient colors for stress contours. Default: blue→cyan→green→yellow→red.",
                 GH_ParamAccess.list);
+            // [7] Stress Min Override
+            unit.RegisterInputParam(new Param_Number { Optional = true }, "Stress Min", "Smin",
+                "Optional minimum stress for color mapping. Leave empty for auto.", GH_ParamAccess.item);
+            // [8] Stress Max Override
+            unit.RegisterInputParam(new Param_Number { Optional = true }, "Stress Max", "Smax",
+                "Optional maximum stress for color mapping. Leave empty for auto.", GH_ParamAccess.item);
 
             // ── Reaction Forces inputs ──
-            // [5] Force Scale
+            // [9] Force Scale
             unit.RegisterInputParam(new Param_Number(), "Force Scale", "Fs",
                 "Scale factor for reaction force arrows.", GH_ParamAccess.item);
-            ((Param_Number)unit.Inputs[5].Parameter).SetPersistentData(new GH_Number(1.0));
+            ((Param_Number)unit.Inputs[9].Parameter).SetPersistentData(new GH_Number(1.0));
 
             // ── Outputs ──
             // [0] Model (pass-through)
@@ -96,10 +108,16 @@ namespace Llama.Gh.Components
             // [4] Stress Max
             unit.RegisterOutputParam(new Param_Number(), "Stress Max", "Smax",
                 "Maximum stress value for the selected component.");
-            // [5] Force Lines
+            // [5] Disp Min (output)
+            unit.RegisterOutputParam(new Param_Number(), "Disp Min", "Dmin",
+                "Effective minimum displacement used for color mapping.");
+            // [6] Disp Max (output)
+            unit.RegisterOutputParam(new Param_Number(), "Disp Max", "Dmax",
+                "Effective maximum displacement used for color mapping.");
+            // [7] Force Lines
             unit.RegisterOutputParam(new Param_Line(), "Force Lines", "FL",
                 "Reaction force arrows as lines from support nodes.");
-            // [6] Force Colors
+            // [8] Force Colors
             unit.RegisterOutputParam(new Param_Colour(), "Force Colors", "FC",
                 "Colors for reaction force lines mapped by magnitude.");
 
@@ -107,7 +125,11 @@ namespace Llama.Gh.Components
             var meshMenu = new GH_ExtendableMenu(0, "menu_mesh") { Name = "Deformed Geometry" };
             meshMenu.RegisterInputPlug(unit.Inputs[2]);  // Displacement Scale
             meshMenu.RegisterInputPlug(unit.Inputs[3]);  // Deformed Colors
+            meshMenu.RegisterInputPlug(unit.Inputs[4]);  // Disp Min
+            meshMenu.RegisterInputPlug(unit.Inputs[5]);  // Disp Max
             meshMenu.RegisterOutputPlug(unit.Outputs[1]); // Deformed Mesh
+            meshMenu.RegisterOutputPlug(unit.Outputs[5]); // Disp Min (output)
+            meshMenu.RegisterOutputPlug(unit.Outputs[6]); // Disp Max (output)
             meshMenu.Expand();
             unit.AddMenu(meshMenu);
 
@@ -126,7 +148,9 @@ namespace Llama.Gh.Components
             _ddStressComponent.ValueChanged += (s, e) => ExpireSolution(true);
             stressPanel.AddControl(_ddStressComponent);
             stressMenu.AddControl(stressPanel);
-            stressMenu.RegisterInputPlug(unit.Inputs[4]);  // Stress Colors
+            stressMenu.RegisterInputPlug(unit.Inputs[7]);  // Stress Min Override
+            stressMenu.RegisterInputPlug(unit.Inputs[8]);  // Stress Max Override
+            stressMenu.RegisterInputPlug(unit.Inputs[6]);  // Stress Colors
             stressMenu.RegisterOutputPlug(unit.Outputs[2]); // Stress Mesh
             stressMenu.RegisterOutputPlug(unit.Outputs[3]); // Stress Min
             stressMenu.RegisterOutputPlug(unit.Outputs[4]); // Stress Max
@@ -135,9 +159,9 @@ namespace Llama.Gh.Components
 
             // ── Reaction Forces menu ──
             var forceMenu = new GH_ExtendableMenu(2, "menu_forces") { Name = "Reaction Forces" };
-            forceMenu.RegisterInputPlug(unit.Inputs[5]);  // Force Scale
-            forceMenu.RegisterOutputPlug(unit.Outputs[5]); // Force Lines
-            forceMenu.RegisterOutputPlug(unit.Outputs[6]); // Force Colors
+            forceMenu.RegisterInputPlug(unit.Inputs[9]);  // Force Scale
+            forceMenu.RegisterOutputPlug(unit.Outputs[7]); // Force Lines
+            forceMenu.RegisterOutputPlug(unit.Outputs[8]); // Force Colors
             forceMenu.Expand();
             unit.AddMenu(forceMenu);
 
@@ -167,12 +191,24 @@ namespace Llama.Gh.Components
 
             // ── Stress Component inputs ──
             var stressColors = new List<Color>();
-            if (Params.Input.Count > 4 && Params.Input[4].SourceCount > 0)
-                DA.GetDataList(4, stressColors);
+            if (Params.Input.Count > 6 && Params.Input[6].SourceCount > 0)
+                DA.GetDataList(6, stressColors);
+
+            // ── Displacement range overrides ──
+            double userDispMin = double.NaN;
+            double userDispMax = double.NaN;
+            DA.GetData(4, ref userDispMin);
+            DA.GetData(5, ref userDispMax);
+
+            // ── Stress range overrides ──
+            double userStressMin = double.NaN;
+            double userStressMax = double.NaN;
+            DA.GetData(7, ref userStressMin);
+            DA.GetData(8, ref userStressMax);
 
             // ── Reaction Forces inputs ──
             double forceScale = 1.0;
-            DA.GetData(5, ref forceScale);
+            DA.GetData(9, ref forceScale);
 
             // ── Unwrap model ──
             if (!TryUnwrapStructuralModel(modelObj, out var model))
@@ -246,9 +282,12 @@ namespace Llama.Gh.Components
             var defGradient = defColors.Count >= 2 ? defColors : DefaultDeformedGradient();
             var stressGradient = stressColors.Count >= 2 ? stressColors : DefaultStressGradient();
 
-            // ── Displacement magnitudes for deformed mesh coloring ──
+            // ── Effective displacement range (auto or user override) ──
+            var effectiveDispMin = double.IsNaN(userDispMin) ? _cachedDispMin : userDispMin;
+            var effectiveDispMax = double.IsNaN(userDispMax) ? _cachedDispMax : userDispMax;
+
             // Output [1]: Deformed Mesh (colored by displacement magnitude)
-            var deformedMesh = BuildRhinoMesh(meshData, _cachedDispMagnitudes, _cachedDispMin, _cachedDispMax, defGradient);
+            var deformedMesh = BuildRhinoMesh(meshData, _cachedDispMagnitudes, effectiveDispMin, effectiveDispMax, defGradient);
             DA.SetData(1, deformedMesh);
 
             // ── Stress computation ──
@@ -265,13 +304,21 @@ namespace Llama.Gh.Components
                 stressMax = range.Max;
             }
 
+            // ── Effective stress range (auto or user override) ──
+            var effectiveStressMin = double.IsNaN(userStressMin) ? stressMin : userStressMin;
+            var effectiveStressMax = double.IsNaN(userStressMax) ? stressMax : userStressMax;
+
             // Output [2]: Stress Mesh (colored by stress)
-            var stressMesh = BuildRhinoMesh(meshData, nodeStress, stressMin, stressMax, stressGradient);
+            var stressMesh = BuildRhinoMesh(meshData, nodeStress, effectiveStressMin, effectiveStressMax, stressGradient);
             DA.SetData(2, stressMesh);
 
             // Output [3],[4]: Stress Min/Max
-            DA.SetData(3, stressMin);
-            DA.SetData(4, stressMax);
+            DA.SetData(3, effectiveStressMin);
+            DA.SetData(4, effectiveStressMax);
+
+            // Output [5],[6]: Disp Min/Max
+            DA.SetData(5, effectiveDispMin);
+            DA.SetData(6, effectiveDispMax);
 
             // ── Reaction force lines ──
             if (_cachedReactions != null && _cachedReactions.Count > 0)
@@ -306,13 +353,13 @@ namespace Llama.Gh.Components
                     forceColors.Add(InterpolateGradient(stressGradient, magnitudes[i], fMin, fMax));
                 }
 
-                DA.SetDataList(5, forceLines);
-                DA.SetDataList(6, forceColors);
+                DA.SetDataList(7, forceLines);
+                DA.SetDataList(8, forceColors);
             }
             else
             {
-                DA.SetDataList(5, new Line[0]);
-                DA.SetDataList(6, new Color[0]);
+                DA.SetDataList(7, new Line[0]);
+                DA.SetDataList(8, new Color[0]);
             }
         }
 
